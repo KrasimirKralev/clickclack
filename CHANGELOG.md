@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Corrected the source-install pnpm version and quickstart caller-authentication count to match the current toolchain and authentication guide. Thanks @KrasimirKralev.
+
 ## 0.6.0 - 2026-09-24
 
 **Highlights:** Phone alerts with per-device controls and automatic OIDC endpoint discovery.
