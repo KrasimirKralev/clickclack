@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Revoke the stored CLI session before removing local credentials on logout, preserving credentials for retry when the server is unavailable. Thanks @KrasimirKralev.
+
 - Move macOS desktop CI and release verification to macOS 27, run Intel server checks with Rosetta, and verify signed macOS assets during release dry runs while preserving deployment minimums.
 
 ## 0.9.0 - 2026-10-18
