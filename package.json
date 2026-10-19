@@ -8,7 +8,8 @@
     "build:web": "pnpm --filter @clickclack/web build",
     "docs:site": "node scripts/build-docs-site.mjs",
     "build:desktop": "pnpm --filter @clickclack/desktop build",
-    "check": "pnpm test && pnpm test:fakeco-aws && pnpm test:desktop && pnpm typecheck && pnpm -r typecheck && pnpm lint && pnpm fmt:check",
+    "check": "pnpm check:sqlite-runtime && pnpm test && pnpm test:fakeco-aws && pnpm test:desktop && pnpm typecheck && pnpm -r typecheck && pnpm lint && pnpm fmt:check",
+    "check:sqlite-runtime": "bash scripts/check-sqlite-runtime.sh",
     "coverage": "bash scripts/check-go-coverage.sh",
     "dev:web": "pnpm --filter @clickclack/web dev",
     "dev:api": "go run ./apps/api/cmd/clickclack serve --dev-bootstrap=true",
@@ -38,14 +39,14 @@
   "packageManager": "pnpm@12.7.0",
   "devDependencies": {
     "@cloudflare/containers": "0.3.7",
-    "@playwright/test": "^1.64.0",
+    "@playwright/test": "^1.64.1",
     "@types/node": "^26.6.5",
     "@typescript/native": "npm:typescript@^7.0.2",
     "fflate": "^0.8.3",
     "oxfmt": "^0.73.0",
     "oxlint": "^1.88.0",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "wrangler": "4.150.0"
+    "wrangler": "4.151.1"
   },
   "engines": {
     "node": ">=24"
