@@ -60,11 +60,24 @@ func (c apiClient) logout(args []string) error {
 	if err != nil {
 		return err
 	}
+	if err := c.revokeStoredSession(); err != nil {
+		return fmt.Errorf("revoke stored session: %w (credentials kept in %s; retry or delete that file)", err, path)
+	}
 	if err := os.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
 		return err
 	}
 	c = c.withOptions(opts, false)
 	return c.write(map[string]bool{"logged_out": true}, "logged_out", "logged out\n")
+}
+
+// Use the stored server and token only, so --server or CLICKCLACK_TOKEN cannot redirect or swap them.
+func (c apiClient) revokeStoredSession() error {
+	cfg := c.defaults.config
+	if !c.defaults.hasConfig || strings.TrimSpace(cfg.Token) == "" || strings.TrimSpace(cfg.Server) == "" {
+		return nil
+	}
+	c.opts = clientOptions{Server: cfg.Server, Token: cfg.Token}
+	return c.doJSON(context.Background(), http.MethodPost, "/api/auth/logout", struct{}{}, nil)
 }
 
 func (c apiClient) whoami(args []string) error {
