@@ -21,7 +21,7 @@ Commands:
   backup     write a SQLite backup file
   export     write a JSON dump to a file or stdout
   login      consume a magic-link token and store/print a session token
-  logout     remove stored client credentials
+  logout     revoke the stored session and remove stored client credentials
   whoami     print the current server-side user
   status     print selected server/user/workspace/channel
   canary     prove a human ClickClack -> OpenClaw -> quoted bot reply round trip
@@ -293,7 +293,10 @@ Consumes a magic-link token through `/api/auth/magic/consume`. By default it
 stores the returned session token in the client config file. Use `--no-store`
 for CI or tests that only need stdout.
 
-`logout` removes the stored client config.
+`logout` revokes the stored session token on the server it was issued by
+(`POST /api/auth/logout`), then removes the stored client config. If the server
+cannot revoke it, the config is kept so the command can be retried; delete the
+file by hand to discard the credentials locally.
 
 For remote or hosted agents, prefer `login` plus stored credentials or
 `CLICKCLACK_TOKEN`. Reserve `--user` for local/dev servers where explicit user

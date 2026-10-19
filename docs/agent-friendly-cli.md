@@ -59,7 +59,7 @@ Server:
 
 Client:
   login                         authenticate with a server
-  logout                        remove stored credentials
+  logout                        revoke the stored session and remove stored credentials
   whoami                        print the current caller
   status                        print server, auth, workspace, and channel
   canary                        prove an OpenClaw quoted-reply round trip
