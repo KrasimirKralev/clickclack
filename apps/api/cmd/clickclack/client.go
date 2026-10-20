@@ -90,7 +90,7 @@ func client(args []string) error {
 		if len(rest) < 2 {
 			return errors.New("usage: clickclack reply <message-id> [body]")
 		}
-		return c.threadReply(rest[1], rest[2:])
+		return c.threadReply(rest[1:])
 	default:
 		return fmt.Errorf("unknown command %q", rest[0])
 	}

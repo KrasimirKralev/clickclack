@@ -184,7 +184,7 @@ func (c apiClient) messages(args []string) error {
 
 func (c apiClient) send(args []string) error {
 	opts := c.opts
-	bodyFromFlag, stdin, file, replyTo, rest, err := parseBodyCommand("send", args, &opts)
+	bodyFromFlag, stdin, file, replyTo, rest, err := parseBodyCommand("send", args, &opts, nil)
 	if err != nil {
 		return err
 	}
@@ -259,15 +259,15 @@ func (c apiClient) threads(args []string) error {
 	}
 	switch args[0] {
 	case "open":
-		return c.threadOpen(args[1], args[2:])
+		return c.threadOpen(args[1:])
 	case "reply":
-		return c.threadReply(args[1], args[2:])
+		return c.threadReply(args[1:])
 	default:
 		return fmt.Errorf("unknown threads command %q", args[0])
 	}
 }
 
-func (c apiClient) threadOpen(messageID string, args []string) error {
+func (c apiClient) threadOpen(args []string) error {
 	opts := c.opts
 	flags := flag.NewFlagSet("threads open", flag.ExitOnError)
 	addClientFlags(flags, &opts)
@@ -278,6 +278,10 @@ func (c apiClient) threadOpen(messageID string, args []string) error {
 	flags.Int64("after-seq", 0, "show replies after this thread sequence")
 	flags.Int64("around-seq", 0, "show replies around this thread sequence")
 	if err := flags.Parse(args); err != nil {
+		return err
+	}
+	messageID, err := parseMessageID(flags)
+	if err != nil {
 		return err
 	}
 	c = c.withOptions(opts, true)
@@ -306,9 +310,10 @@ func (c apiClient) threadOpen(messageID string, args []string) error {
 	return nil
 }
 
-func (c apiClient) threadReply(messageID string, args []string) error {
+func (c apiClient) threadReply(args []string) error {
 	opts := c.opts
-	bodyFromFlag, stdin, file, replyTo, rest, err := parseBodyCommand("threads reply", args, &opts)
+	var messageID string
+	bodyFromFlag, stdin, file, replyTo, rest, err := parseBodyCommand("threads reply", args, &opts, &messageID)
 	if err != nil {
 		return err
 	}
@@ -389,7 +394,7 @@ func (c apiClient) reactions(args []string) error {
 	return c.write(result, "", human)
 }
 
-func parseBodyCommand(name string, args []string, opts *clientOptions) (*string, *bool, *string, *string, []string, error) {
+func parseBodyCommand(name string, args []string, opts *clientOptions, messageID *string) (*string, *bool, *string, *string, []string, error) {
 	flags := flag.NewFlagSet(name, flag.ExitOnError)
 	addClientFlags(flags, opts)
 	body := flags.String("body", "", "message body")
@@ -399,7 +404,26 @@ func parseBodyCommand(name string, args []string, opts *clientOptions) (*string,
 	if err := flags.Parse(args); err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
+	if messageID != nil {
+		id, err := parseMessageID(flags)
+		if err != nil {
+			return nil, nil, nil, nil, nil, err
+		}
+		*messageID = id
+	}
 	return body, stdin, file, replyTo, flags.Args(), nil
+}
+
+// parseMessageID accepts flags on either side of the message ID.
+func parseMessageID(flags *flag.FlagSet) (string, error) {
+	if flags.NArg() == 0 {
+		return "", errors.New("message ID is required")
+	}
+	messageID := flags.Arg(0)
+	if err := flags.Parse(flags.Args()[1:]); err != nil {
+		return "", err
+	}
+	return messageID, nil
 }
 
 func messagePayload(body, replyTo string) map[string]string {

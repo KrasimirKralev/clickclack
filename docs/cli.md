@@ -322,6 +322,11 @@ clickclack threads open msg_... --latest --limit 50 --json
 clickclack threads open msg_... --before-seq 151 --limit 50 --json
 ```
 
+`threads open`, `threads reply`, and the `reply` alias accept flags before or
+after the message ID, for example `clickclack threads open --json msg_...`.
+For replies, flags must precede the positional body; words after the body begins
+remain body text.
+
 Cursors use thread sequences, including zero, and cannot be combined with one
 another or with `--latest`. See [thread pagination](features/threads.md#ordering-and-pagination).
 
