@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Correct the install and deployment docs: GoReleaser does not build the macOS server archives, and their checksums live in `ClickClack-<version>-mac-server-SHA256SUMS.txt`, not `sha256sums.txt`. Thanks @KrasimirKralev.
+
 ## 0.9.1 - 2026-10-20
 
 **Highlights:** Safer certificate verification and CLI logout, with reliable thread commands and readable compact timestamps.
