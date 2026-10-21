@@ -831,10 +831,25 @@ test("aligns self and other messages independently", async ({ page }) => {
     channel: { id: string; name: string };
   };
 
+  const selfUserID = clickclack([
+    "admin",
+    "user",
+    "create",
+    "--data",
+    "./data/e2e",
+    "--workspace",
+    workspaceId,
+    "--name",
+    "Alignment Self",
+    "--email",
+    `alignment-self-${randomUUID()}@example.com`,
+  ]);
+
   const selfMessage = "Alignment proof from the current user.";
   const humanMessage = "Alignment proof from a human teammate.";
   const agentMessage = "Alignment proof from an agent.";
   const selfMessageResponse = await page.request.post(`/api/channels/${channel.id}/messages`, {
+    headers: { "X-ClickClack-User": selfUserID },
     data: { body: selfMessage },
   });
   expect(selfMessageResponse.ok()).toBe(true);
@@ -842,6 +857,7 @@ test("aligns self and other messages independently", async ({ page }) => {
     message: { id: string };
   };
   const uploadResponse = await page.request.post(`/api/uploads?workspace_id=${workspaceId}`, {
+    headers: { "X-ClickClack-User": selfUserID },
     multipart: {
       file: {
         name: "alignment-proof.txt",
@@ -854,7 +870,7 @@ test("aligns self and other messages independently", async ({ page }) => {
   const { upload } = (await uploadResponse.json()) as { upload: { id: string } };
   const attachResponse = await page.request.post(
     `/api/messages/${createdSelfMessage.id}/attachments`,
-    { data: { upload_id: upload.id } },
+    { headers: { "X-ClickClack-User": selfUserID }, data: { upload_id: upload.id } },
   );
   expect(attachResponse.ok()).toBe(true);
 
@@ -930,12 +946,13 @@ test("aligns self and other messages independently", async ({ page }) => {
     expect(replyResponse.ok()).toBe(true);
   }
 
+  await page.context().setExtraHTTPHeaders({ "X-ClickClack-User": selfUserID });
   await page.goto("/app");
   await waitForAppReady(page);
   await page.getByRole("link", { name: `# ${channel.name}` }).click();
   await expect(page.getByRole("heading", { name: `#${channel.name}` })).toBeVisible();
   await page.getByRole("button", { name: /Account settings for/ }).click({ button: "right" });
-  const settings = page.getByLabel("Account settings");
+  const settings = page.getByRole("dialog", { name: "Account settings", exact: true });
   const userAlign = settings.getByLabel("Your message alignment");
   const otherAlign = settings.getByLabel("Other message alignment");
   const messageSide = async (message: string) =>
@@ -1030,10 +1047,16 @@ test("aligns self and other messages independently", async ({ page }) => {
     }
   };
 
-  await expectLayout("left", "left");
-  await expectLayout("left", "right");
-  await expectLayout("right", "left");
-  await expectLayout("right", "right");
+  for (const density of ["", "compact"]) {
+    await page.evaluate((value) => {
+      if (value) document.documentElement.setAttribute("data-density", value);
+      else document.documentElement.removeAttribute("data-density");
+    }, density);
+    await expectLayout("left", "left");
+    await expectLayout("left", "right");
+    await expectLayout("right", "left");
+    await expectLayout("right", "right");
+  }
 
   await settings.getByRole("button", { name: "Close" }).click();
   for (const body of [selfMessage, humanMessage, agentMessage]) {

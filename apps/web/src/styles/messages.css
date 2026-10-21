@@ -2634,15 +2634,17 @@
    naturally lives. Outlined rows no longer extend, so keep the timestamp in
    that same gutter explicitly instead of letting it overlap the boundary. */
 :root[data-message-layout="outlined"] .message-group .row-stamp {
-  left: -48px;
+  right: calc(100% + 8px);
+  left: auto;
+  white-space: nowrap;
 }
 
 :root[data-message-layout="outlined"][data-user-align="right"] .message-group.is-self .row-stamp,
 :root[data-message-layout="outlined"][data-other-align="right"]
   .message-group:not(.is-self)
   .row-stamp {
-  right: -48px;
-  left: auto;
+  right: auto;
+  left: calc(100% + 8px);
 }
 
 :root[data-message-layout="outlined"] .message-group .message-row:not(:first-child) {
@@ -2780,20 +2782,6 @@
 :root[data-density="compact"][data-message-layout="outlined"] .message-group .message-row {
   margin-left: 0;
   padding-left: 0;
-}
-
-:root[data-density="compact"][data-message-layout="outlined"] .message-group .row-stamp {
-  left: -34px;
-}
-
-:root[data-density="compact"][data-message-layout="outlined"][data-user-align="right"]
-  .message-group.is-self
-  .row-stamp,
-:root[data-density="compact"][data-message-layout="outlined"][data-other-align="right"]
-  .message-group:not(.is-self)
-  .row-stamp {
-  right: -34px;
-  left: auto;
 }
 
 @media (max-width: 520px) {
