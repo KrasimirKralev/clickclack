@@ -83,7 +83,7 @@ func TestThreadOpenPreservesAPIPages(t *testing.T) {
 	}
 	t.Run("invalid cursors", func(t *testing.T) {
 		for _, args := range [][]string{{"--latest", "--after-seq", "1"}, {"--before-seq", "2", "--after-seq", "1"}, {"--after-seq", "-1"}} {
-			if err := c.threadOpen(root.ID, args); err == nil || !strings.Contains(err.Error(), "400") {
+			if err := c.threadOpen(append([]string{root.ID}, args...)); err == nil || !strings.Contains(err.Error(), "400") {
 				t.Fatalf("args %v: want API validation error, got %v", args, err)
 			}
 		}

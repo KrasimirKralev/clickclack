@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Keep localized hover timestamps outside compact outlined message bubbles, and stabilize browser layout checks across appearance settings.
+
+- Accept client flags before the message ID in CLI `threads open`, `threads reply`, and `reply`, which previously sent the flag as the message ID and failed. Thanks @KrasimirKralev.
+
 - Align SQLite with its required libc runtime and update Playwright, Wrangler, Electron 43, and Chi while preserving runtime minimums and the 48-hour dependency release-age gate.
 
 - Revoke the stored CLI session before removing local credentials on logout, preserving credentials for retry when the server is unavailable. Thanks @KrasimirKralev.

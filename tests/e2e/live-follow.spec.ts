@@ -1,10 +1,14 @@
 import { expect, test, type CDPSession } from "@playwright/test";
 import { randomUUID } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { waitForAppReady } from "./app-ready";
 import { pauseMessageFrames, settleScrollFrames } from "./message-frames";
 
-for (const input of ["wheel", "keyboard", "touch"] as const) {
-  test(`a ${input} scroll cancels a pending live follow`, async ({ page }) => {
+const cases = (["comfortable", "compact"] as const).flatMap((density) =>
+  (["wheel", "keyboard", "touch"] as const).map((input) => ({ density, input })),
+);
+for (const { density, input } of cases) {
+  test(`${density}: a ${input} scroll cancels a pending live follow`, async ({ page }) => {
     const workspaceResponse = await page.request.post("/api/workspaces", {
       data: { name: `Follow cancellation ${randomUUID()}` },
     });
@@ -19,6 +23,26 @@ for (const input of ["wheel", "keyboard", "touch"] as const) {
     const { channel } = (await channelResponse.json()) as {
       channel: { id: string; route_id: string };
     };
+    const userID = execFileSync(
+      "go",
+      [
+        "run",
+        "./apps/api/cmd/clickclack",
+        "admin",
+        "user",
+        "create",
+        "--data",
+        "./data/e2e",
+        "--workspace",
+        workspace.id,
+        "--name",
+        "Follow Tester",
+        "--email",
+        `follow-${randomUUID()}@example.com`,
+      ],
+      { encoding: "utf8" },
+    ).trim();
+    await page.context().setExtraHTTPHeaders({ "X-ClickClack-User": userID });
     const messagesPath = `/api/channels/${channel.id}/messages`;
     const seed = await page.request.post(messagesPath, {
       data: {
@@ -33,6 +57,10 @@ for (const input of ["wheel", "keyboard", "touch"] as const) {
     expect(seed.ok()).toBe(true);
     await page.goto(`/app/${workspace.route_id}/${channel.route_id}`);
     await waitForAppReady(page);
+    await page.evaluate((value) => {
+      if (value === "compact") document.documentElement.setAttribute("data-density", value);
+      else document.documentElement.removeAttribute("data-density");
+    }, density);
     await settleScrollFrames(page);
     const scroller = page.locator(".messages-scroll");
     const bottomGap = () =>
@@ -74,10 +102,11 @@ for (const input of ["wheel", "keyboard", "touch"] as const) {
       }
       await expect.poll(bottomGap).toBeGreaterThan(300);
       // Reflow the same virtual group while the canceled follow still awaits a frame.
-      const heightBeforeResize = await scroller.evaluate((el) => el.scrollHeight);
-      await page.setViewportSize({ width: 1100, height: 720 });
+      const group = page.locator(".message-group").first();
+      const heightBeforeResize = await group.evaluate((el) => el.getBoundingClientRect().height);
+      await page.setViewportSize({ width: 900, height: 720 });
       await expect
-        .poll(() => scroller.evaluate((el) => el.scrollHeight))
+        .poll(() => group.evaluate((el) => el.getBoundingClientRect().height))
         .toBeGreaterThan(heightBeforeResize);
       await expect.poll(bottomGap).toBeGreaterThan(300);
     } finally {
