@@ -55,9 +55,12 @@ CLICKCLACK_WEB_VERSION="$(git rev-parse --short=12 HEAD)" pnpm build
 ## Releases
 
 GoReleaser is configured in `.goreleaser.yml`. It builds `clickclack` for
-Linux, macOS, Windows, and FreeBSD on `amd64` and `arm64`, with Windows
+Linux, Windows, and FreeBSD on `amd64` and `arm64`, with Windows
 archives emitted as `.zip` and the others as `.tar.gz`. Linux `.deb` and
-`.rpm` packages are generated through nfpm.
+`.rpm` packages are generated through nfpm. These artifacts are covered by
+`sha256sums.txt`. The signed and notarized macOS server archives are built
+separately by the [macOS release command](releasing.html) and are covered by
+`ClickClack-<version>-mac-server-SHA256SUMS.txt`.
 
 ```sh
 pnpm install
