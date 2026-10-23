@@ -74,7 +74,9 @@ sudo rpm -i clickclack-<version>-1.x86_64.rpm
 ```
 
 Release archives include `LICENSE`, `README.md`, `SPEC.md`, `CHANGELOG.md`,
-and the docs tree. Checksums are published as `sha256sums.txt`.
+and the docs tree. `sha256sums.txt` covers the Linux, Windows, and FreeBSD
+archives and the Linux packages; the macOS server archives are listed in
+`ClickClack-<version>-mac-server-SHA256SUMS.txt`.
 
 ## What you get
 

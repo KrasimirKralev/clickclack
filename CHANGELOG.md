@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Correct the install and deployment docs: signed macOS server archives are built separately from GoReleaser and use `ClickClack-<version>-mac-server-SHA256SUMS.txt`. Thanks @KrasimirKralev.
+
 ## 0.9.1 - 2026-10-20
 
 **Highlights:** Safer certificate verification and CLI logout, with reliable thread commands and readable compact timestamps.
