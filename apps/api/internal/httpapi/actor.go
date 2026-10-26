@@ -36,11 +36,23 @@ type actor struct {
 
 var errSessionLookupUnavailable = errors.New("session verification unavailable; retry later")
 
+// sessionNotFoundError is the 401 text for a token that matches no session
+// (never issued, or revoked by sign-out) in place of "sql: no rows in result
+// set". It unwraps to the store error, so errors.Is checks keep working.
+type sessionNotFoundError struct{ err error }
+
+func (e sessionNotFoundError) Error() string { return "session not found or signed out; sign in again" }
+
+func (e sessionNotFoundError) Unwrap() error { return e.err }
+
 // Only missing or expired sessions invalidate authentication. Backend failures
 // must remain retryable across HTTP and already-open realtime connections.
 func (s *Server) sessionUser(ctx context.Context, token string) (store.User, error) {
 	user, err := s.store.GetSessionUser(ctx, token)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) && !errors.Is(err, store.ErrSessionExpired) {
+	if errors.Is(err, sql.ErrNoRows) {
+		return store.User{}, sessionNotFoundError{err: err}
+	}
+	if err != nil && !errors.Is(err, store.ErrSessionExpired) {
 		return store.User{}, fmt.Errorf("%w: %w", errSessionLookupUnavailable, err)
 	}
 	return user, err

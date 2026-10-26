@@ -6,6 +6,7 @@
 - Reject compromised certificate authority keys in the local Worker runtime by pinning patched workerd. Thanks @joshavant.
 - Patch SvelteKit, URI parsing, brace expansion, HTTP cache parsing, and HTTP client vulnerabilities in web tooling and desktop packaging dependencies.
 - Update SQLite and its paired libc runtime, virtual scrolling, desktop packaging, and Wrangler while preserving runtime minimums and the 48-hour dependency release-age gate; align the development guide with the pinned pnpm version.
+- Answer an API call with a signed-out or unknown session token with "session not found or signed out; sign in again" instead of the database's `sql: no rows in result set`. Thanks @KrasimirKralev.
 - Correct the agent-friendly CLI docs: the message body comes from `--body`, then `--file`, then `--stdin`, and the positional argument is used only when none of them is given. Thanks @KrasimirKralev.
 
 ## 0.9.2 - 2026-10-23
