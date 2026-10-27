@@ -29,6 +29,10 @@ resolver lives in `apps/api/internal/httpapi/server.go` (`currentActor`).
 The dev fallback must stay off in any non-local deployment. `--dev-bootstrap=false`
 is the default; require real sessions.
 
+Unknown or signed-out bearer and cookie sessions return HTTP 401 with
+`session not found or signed out; sign in again`. Expired sessions return
+`session expired`; temporary session lookup failures return HTTP 503 and can be retried.
+
 ## Local owner bootstrap
 
 `clickclack serve --dev-bootstrap=true` calls `Store.EnsureBootstrap`.
